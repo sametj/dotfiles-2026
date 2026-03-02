@@ -1,0 +1,10 @@
+# ============================
+# TJ ZSHRC (dotfiles)
+# ============================
+
+export DOTFILES="$HOME/dotfiles"
+
+# Load all zsh modules
+for file in "$DOTFILES/config/shell/zsh/conf.d/"*.zsh; do
+  [[ -f "$file" ]] && source "$file"
+done
