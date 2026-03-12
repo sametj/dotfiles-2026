@@ -4,6 +4,10 @@ return {
 	build = ":MasonUpdate",
 	cmd = "Mason",
 	opts = {
+		registries = {
+			"github:mason-org/mason-registry",
+			"github:Crashdummyy/mason-registry",
+		},
 		ui = {
 			border = "rounded",
 			icons = {
@@ -28,11 +32,13 @@ return {
 			-- Web / JS
 			"eslint_d",
 			"prettierd",
+			"css-lsp",
 			"css-variables-language-server",
 			"cssmodules-language-server",
 			"stylelint",
 			"html-lsp",
 			"emmet-language-server",
+			"json-lsp",
 
 			-- Python
 			"pyright",
@@ -42,6 +48,16 @@ return {
 
 			-- Debugging
 			"js-debug-adapter",
+
+			-- C#
+			-- "csharp-language-server",
+			"csharpier",
+
+			-- Azure
+			"bicep-lsp",
+
+			-- XML
+			"xmlformatter",
 		},
 	},
 

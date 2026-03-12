@@ -128,3 +128,16 @@ map("n", "<C-_>", open_terminal_in_root, { desc = "Toggle Terminal (Root)" })
 map("t", "<C-_>", "<cmd>close<cr>", { desc = "Hide Terminal" })
 map("n", "<C-\\>", open_terminal_in_root, { desc = "Toggle Terminal (Root)" })
 map("t", "<C-\\>", "<cmd>close<cr>", { desc = "Hide Terminal" })
+
+-- DAP KEYBINDS
+-- map("n", "<leader>db", function()
+-- 	require("dap").toggle_breakpoint()
+-- end, { desc = "Toggle Breakpoint" })
+--
+-- map("n", "<leader>dB", function()
+-- 	require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))
+-- end, { desc = "Conditional Breakpoint" })
+--
+-- map("n", "<leader>du", function()
+-- 	require("dapui").toggle({})
+-- end, { desc = "Toggle Debug UI" })

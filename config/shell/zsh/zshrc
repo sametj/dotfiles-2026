@@ -8,3 +8,4 @@ export DOTFILES="$HOME/dotfiles"
 for file in "$DOTFILES/config/shell/zsh/conf.d/"*.zsh; do
   [[ -f "$file" ]] && source "$file"
 done
+export PATH=$PATH:$HOME/.local/bin
