@@ -7,11 +7,31 @@ source "$(dirname "$0")/../lib.sh"
 nvm_task() {
   log "[nvm] Installing nvm + Node LTS + pnpm..."
 
-  ensure_apt
-  ensure_sudo
+  case "${PLATFORM:-}" in
+    macos)
+      ensure_brew
+      setup_brew_shellenv
+      ;;
+    linux|wsl)
+      ensure_apt
+      ensure_sudo
+      ;;
+    *)
+      die "[nvm] Unsupported platform: ${PLATFORM:-unset}"
+      ;;
+  esac
 
-  sudo apt-get update -y
-  sudo apt-get install -y curl ca-certificates git
+  if ! has_cmd curl; then
+    pkg_install curl
+  else
+    log "[nvm] curl already installed: $(command -v curl)"
+  fi
+
+  if ! has_cmd git; then
+    pkg_install git
+  else
+    log "[nvm] git already installed: $(command -v git)"
+  fi
 
   # Install nvm if missing
   if [[ ! -d "$HOME/.nvm" ]]; then
@@ -25,13 +45,11 @@ nvm_task() {
   # shellcheck disable=SC1090
   source "$HOME/.nvm/nvm.sh"
 
-  # Install and activate Node LTS
   log "[nvm] Installing Node LTS..."
   nvm install --lts
   nvm alias default 'lts/*'
   nvm use default
 
-  # Enable corepack and activate pnpm
   if command -v corepack >/dev/null 2>&1; then
     log "[nvm] Enabling corepack..."
     corepack enable
@@ -41,9 +59,11 @@ nvm_task() {
     npm install -g pnpm
   fi
 
-  # Ensure zsh loads nvm
-  local confdir="$HOME/dotfiles/config/shell/zsh/conf.d"
-  local nvm_conf="$confdir/45-nvm.zsh"
+  local root confdir nvm_conf
+  root="$(repo_root)"
+  confdir="$root/config/shell/zsh/conf.d"
+  nvm_conf="$confdir/45-nvm.zsh"
+
   mkdir -p "$confdir"
 
   cat >"$nvm_conf" <<'ZSH'
