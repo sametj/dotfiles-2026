@@ -4,24 +4,24 @@ set -euo pipefail
 # shellcheck disable=SC1091
 source "$(dirname "$0")/../lib.sh"
 
-install_netcoredbg() {
+install_netcoredbg_linux() {
   need_cmd curl
   need_cmd tar
   need_cmd find
 
-  log "[netcoredbg] Installing .NET debugger..."
+  log "[netcoredbg] Installing .NET debugger on Linux/WSL..."
 
   local arch version url tmpdir install_dir binary
 
   arch="$(uname -m)"
   case "$arch" in
-  x86_64 | amd64) arch="amd64" ;;
-  aarch64 | arm64) arch="arm64" ;;
-  *) die "[netcoredbg] Unsupported arch: $arch" ;;
+    x86_64|amd64) arch="amd64" ;;
+    aarch64|arm64) arch="arm64" ;;
+    *) die "[netcoredbg] Unsupported arch: $arch" ;;
   esac
 
-  version="$(curl -fsSL https://api.github.com/repos/Samsung/netcoredbg/releases/latest |
-    sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
+  version="$(curl -fsSL https://api.github.com/repos/Samsung/netcoredbg/releases/latest \
+    | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
 
   [[ -n "$version" ]] || die "[netcoredbg] Could not determine latest version."
 
@@ -49,12 +49,24 @@ install_netcoredbg() {
 }
 
 netcoredbg_task() {
-  if command -v netcoredbg >/dev/null 2>&1; then
-    log "[netcoredbg] Already installed."
-    return
-  fi
+  case "${PLATFORM:-}" in
+    linux|wsl)
+      if has_cmd netcoredbg; then
+        log "[netcoredbg] Already installed."
+        return
+      fi
 
-  install_netcoredbg
+      install_netcoredbg_linux
+      ;;
+    macos)
+      warn "[netcoredbg] Skipping on macOS for now."
+      warn "[netcoredbg] Your current installer only supports Linux cleanly."
+      warn "[netcoredbg] macOS binaries/build flow need separate handling."
+      ;;
+    *)
+      die "[netcoredbg] Unsupported platform: ${PLATFORM:-unset}"
+      ;;
+  esac
 }
 
 netcoredbg_task "$@"
