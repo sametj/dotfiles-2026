@@ -7,12 +7,18 @@ source "$(dirname "$0")/../lib.sh"
 ssh_task() {
   log "[ssh] Setting up SSH for GitHub..."
 
+  need_cmd ssh-keygen
+  need_cmd ssh-agent
+  need_cmd ssh-add
+  need_cmd ssh-keyscan
+  need_cmd git
+
   mkdir -p "$HOME/.ssh"
   chmod 700 "$HOME/.ssh"
 
   local key="$HOME/.ssh/id_ed25519"
+  local known_hosts="$HOME/.ssh/known_hosts"
 
-  # Generate key if it doesn't exist
   if [[ ! -f "$key" ]]; then
     log "[ssh] Generating ed25519 SSH key..."
     ssh-keygen -t ed25519 -C "$(git config --global user.email || echo 'github')" -f "$key" -N ""
@@ -20,28 +26,25 @@ ssh_task() {
     log "[ssh] SSH key already exists."
   fi
 
-  # Ensure ssh-agent running
-  if ! pgrep -u "$USER" ssh-agent >/dev/null; then
+  if ! pgrep -u "$USER" ssh-agent >/dev/null 2>&1; then
     log "[ssh] Starting ssh-agent..."
     eval "$(ssh-agent -s)"
   fi
 
   ssh-add "$key" >/dev/null 2>&1 || true
 
-  # Add GitHub to known_hosts (prevents first-connection prompt)
-  if ! grep -q github.com "$HOME/.ssh/known_hosts" 2>/dev/null; then
+  touch "$known_hosts"
+  if ! grep -q "github.com" "$known_hosts" 2>/dev/null; then
     log "[ssh] Adding github.com to known_hosts..."
-    ssh-keyscan github.com >>"$HOME/.ssh/known_hosts" 2>/dev/null
+    ssh-keyscan github.com >>"$known_hosts" 2>/dev/null
   fi
 
-  chmod 644 "$HOME/.ssh/known_hosts"
+  chmod 644 "$known_hosts"
 
-  log ""
   log "[ssh] Public key (add this to GitHub → Settings → SSH keys):"
   echo "------------------------------------------------------------"
   cat "${key}.pub"
   echo "------------------------------------------------------------"
-  log ""
 
   log "[ssh] To test connection after adding key to GitHub:"
   log "       ssh -T git@github.com"

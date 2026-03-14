@@ -63,39 +63,11 @@ set_default_shell_zsh() {
 }
 
 main() {
-  log "[zsh] Installing zsh + dependencies..."
+  log "[zsh] Configuring zsh..."
 
-  case "${PLATFORM:-}" in
-    macos)
-      ensure_brew
-      setup_brew_shellenv
-      ;;
-    linux|wsl)
-      ensure_apt
-      ensure_sudo
-      ;;
-    *)
-      die "[zsh] Unsupported platform: ${PLATFORM:-unset}"
-      ;;
-  esac
-
-  if ! has_cmd zsh; then
-    pkg_install zsh
-  else
-    log "[zsh] zsh already installed: $(command -v zsh)"
-  fi
-
-  if ! has_cmd git; then
-    pkg_install git
-  else
-    log "[zsh] git already installed: $(command -v git)"
-  fi
-
-  if ! has_cmd curl; then
-    pkg_install curl
-  else
-    log "[zsh] curl already installed: $(command -v curl)"
-  fi
+  has_cmd zsh || die "[zsh] zsh is required but not installed."
+  has_cmd git || die "[zsh] git is required but not installed."
+  has_cmd curl || die "[zsh] curl is required but not installed."
 
   install_oh_my_zsh
   install_p10k

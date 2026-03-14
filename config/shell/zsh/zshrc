@@ -1,11 +1,34 @@
 # ============================
-# TJ ZSHRC (dotfiles)
+# Resolve dotfiles root from this file
 # ============================
 
-export DOTFILES="$HOME/dotfiles"
+_zshrc_source="${(%):-%N}"
 
+# Follow symlink if ~/.zshrc is symlinked
+if [[ -L "$_zshrc_source" ]]; then
+  _zshrc_source="$(readlink "$_zshrc_source")"
+fi
+
+# If readlink returned a relative path, resolve it against $HOME
+case "$_zshrc_source" in
+  /*) ;;
+  *) _zshrc_source="$HOME/$_zshrc_source" ;;
+esac
+
+export DOTFILES="${_zshrc_source:A:h:h:h:h}"
+
+# ============================
 # Load all zsh modules
-for file in "$DOTFILES/config/shell/zsh/conf.d/"*.zsh; do
-  [[ -f "$file" ]] && source "$file"
+# ============================
+
+for file in "$DOTFILES/config/shell/zsh/conf.d"/*.zsh(N); do
+  source "$file"
 done
-export PATH=$PATH:$HOME/.local/bin
+
+# ============================
+# User bin first
+# ============================
+
+export PATH="$HOME/.local/bin:$PATH"
+
+unset _zshrc_source

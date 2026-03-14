@@ -7,33 +7,9 @@ source "$(dirname "$0")/../lib.sh"
 nvm_task() {
   log "[nvm] Installing nvm + Node LTS + pnpm..."
 
-  case "${PLATFORM:-}" in
-    macos)
-      ensure_brew
-      setup_brew_shellenv
-      ;;
-    linux|wsl)
-      ensure_apt
-      ensure_sudo
-      ;;
-    *)
-      die "[nvm] Unsupported platform: ${PLATFORM:-unset}"
-      ;;
-  esac
+  has_cmd curl || die "[nvm] curl is required but not installed."
+  has_cmd git || die "[nvm] git is required but not installed."
 
-  if ! has_cmd curl; then
-    pkg_install curl
-  else
-    log "[nvm] curl already installed: $(command -v curl)"
-  fi
-
-  if ! has_cmd git; then
-    pkg_install git
-  else
-    log "[nvm] git already installed: $(command -v git)"
-  fi
-
-  # Install nvm if missing
   if [[ ! -d "$HOME/.nvm" ]]; then
     log "[nvm] Cloning nvm..."
     git clone https://github.com/nvm-sh/nvm.git "$HOME/.nvm"
@@ -41,7 +17,6 @@ nvm_task() {
     log "[nvm] nvm already exists."
   fi
 
-  # Load nvm in this script
   # shellcheck disable=SC1090
   source "$HOME/.nvm/nvm.sh"
 
@@ -71,7 +46,6 @@ nvm_task() {
 export NVM_DIR="$HOME/.nvm"
 [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
 
-# Ensure default Node is active
 if command -v nvm >/dev/null 2>&1; then
   nvm use --silent default >/dev/null 2>&1 || true
 fi

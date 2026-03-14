@@ -5,50 +5,29 @@ set -euo pipefail
 source "$(dirname "$0")/../lib.sh"
 
 git_task() {
-  log "[git] Installing and configuring git..."
+  log "[git] Configuring git..."
 
-  case "${PLATFORM:-}" in
-    macos)
-      ensure_brew
-      setup_brew_shellenv
-      ;;
-    linux|wsl)
-      ensure_apt
-      ensure_sudo
-      ;;
-    *)
-      die "[git] Unsupported platform: ${PLATFORM:-unset}"
-      ;;
-  esac
-
-  if ! has_cmd git; then
-    pkg_install git
-  else
-    log "[git] git already installed: $(command -v git)"
-  fi
+  has_cmd git || die "[git] git is required but not installed."
 
   local root
   root="$(repo_root)"
 
-  # Symlink gitconfig
   safe_symlink "$root/config/git/gitconfig" "$HOME/.gitconfig"
 
-  # Symlink global gitignore
   mkdir -p "$HOME/.config/git"
   safe_symlink "$root/config/git/gitignore_global" "$HOME/.config/git/gitignore_global"
 
-  # Create local config (private, not in repo)
   local local_cfg="$HOME/.gitconfig.local"
   if [[ ! -f "$local_cfg" ]]; then
     warn "[git] Creating $local_cfg (private settings go here)"
-    cat > "$local_cfg" <<'EOF'
+    cat >"$local_cfg" <<'EOF'
 # ~/.gitconfig.local (NOT in dotfiles repo)
 # Put machine-specific or private settings here.
 
 [user]
     email = you@example.com
 
-# Example: if you want different identity for work repos later:
+# Example:
 # [includeIf "gitdir:~/work/"]
 #     path = ~/.gitconfig.work
 EOF

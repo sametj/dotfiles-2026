@@ -15,13 +15,13 @@ install_netcoredbg_linux() {
 
   arch="$(uname -m)"
   case "$arch" in
-    x86_64|amd64) arch="amd64" ;;
-    aarch64|arm64) arch="arm64" ;;
-    *) die "[netcoredbg] Unsupported arch: $arch" ;;
+  x86_64 | amd64) arch="amd64" ;;
+  aarch64 | arm64) arch="arm64" ;;
+  *) die "[netcoredbg] Unsupported arch: $arch" ;;
   esac
 
-  version="$(curl -fsSL https://api.github.com/repos/Samsung/netcoredbg/releases/latest \
-    | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
+  version="$(curl -fsSL https://api.github.com/repos/Samsung/netcoredbg/releases/latest |
+    sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
 
   [[ -n "$version" ]] || die "[netcoredbg] Could not determine latest version."
 
@@ -50,22 +50,20 @@ install_netcoredbg_linux() {
 
 netcoredbg_task() {
   case "${PLATFORM:-}" in
-    linux|wsl)
-      if has_cmd netcoredbg; then
-        log "[netcoredbg] Already installed."
-        return
-      fi
+  linux | wsl)
+    if has_cmd netcoredbg; then
+      log "[netcoredbg] Already installed."
+      return
+    fi
 
-      install_netcoredbg_linux
-      ;;
-    macos)
-      warn "[netcoredbg] Skipping on macOS for now."
-      warn "[netcoredbg] Your current installer only supports Linux cleanly."
-      warn "[netcoredbg] macOS binaries/build flow need separate handling."
-      ;;
-    *)
-      die "[netcoredbg] Unsupported platform: ${PLATFORM:-unset}"
-      ;;
+    install_netcoredbg_linux
+    ;;
+  macos)
+    warn "[netcoredbg] Skipping on macOS for now."
+    ;;
+  *)
+    die "[netcoredbg] Unsupported platform: ${PLATFORM:-unset}"
+    ;;
   esac
 }
 

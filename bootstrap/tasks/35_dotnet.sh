@@ -27,12 +27,7 @@ install_dotnet_linux() {
   fi
 
   pkg_update
-
-  if ! has_cmd dotnet; then
-    sudo apt-get install -y dotnet-sdk-10.0 || true
-  else
-    log "[dotnet] dotnet already installed: $(command -v dotnet)"
-  fi
+  sudo apt-get install -y dotnet-sdk-10.0 || true
 }
 
 install_dotnet_macos() {
@@ -50,15 +45,15 @@ install_dotnet_macos() {
 
 dotnet_task() {
   case "${PLATFORM:-}" in
-    macos)
-      install_dotnet_macos
-      ;;
-    linux|wsl)
-      install_dotnet_linux
-      ;;
-    *)
-      die "[dotnet] Unsupported platform: ${PLATFORM:-unset}"
-      ;;
+  macos)
+    install_dotnet_macos
+    ;;
+  linux | wsl)
+    install_dotnet_linux
+    ;;
+  *)
+    die "[dotnet] Unsupported platform: ${PLATFORM:-unset}"
+    ;;
   esac
 
   log "[dotnet] Installed versions:"
