@@ -9,6 +9,9 @@ NVIM_VERSION="0.11.6"
 nvim_task() {
   log "[nvim] Installing Neovim"
 
+  local root
+  root="$(repo_root)"
+
   case "${PLATFORM:-}" in
   macos)
     ensure_brew
@@ -17,11 +20,11 @@ nvim_task() {
     if has_cmd nvim; then
       log "[nvim] Neovim already installed: $(command -v nvim)"
       nvim --version | head -n 2 || true
-      return
+    else
+      pkg_install neovim
     fi
-
-    pkg_install neovim
     ;;
+
   linux | wsl)
     need_cmd curl
     need_cmd tar
@@ -46,22 +49,34 @@ nvim_task() {
     tmp="/tmp/${extract_dir}.tar.gz"
     install_dir="/opt/nvim-${NVIM_VERSION}"
 
-    log "[nvim] Downloading ${url}"
-    curl -fL -o "$tmp" "$url"
+    if [[ -x /opt/nvim/bin/nvim ]]; then
+      log "[nvim] Neovim already installed at /opt/nvim/bin/nvim"
+      /opt/nvim/bin/nvim --version | head -n 2 || true
+    else
+      log "[nvim] Downloading ${url}"
+      curl -fL -o "$tmp" "$url"
 
-    ensure_sudo
-    sudo rm -rf "$install_dir"
-    sudo tar -C /opt -xzf "$tmp"
-    sudo mv "/opt/${extract_dir}" "$install_dir"
-    sudo ln -sfn "$install_dir" /opt/nvim
+      ensure_sudo
+      sudo rm -rf "$install_dir"
+      sudo tar -C /opt -xzf "$tmp"
+      sudo mv "/opt/${extract_dir}" "$install_dir"
+      sudo ln -sfn "$install_dir" /opt/nvim
 
-    log "[nvim] Installed to /opt/nvim"
-    /opt/nvim/bin/nvim --version | head -n 2 || true
+      log "[nvim] Installed to /opt/nvim"
+      /opt/nvim/bin/nvim --version | head -n 2 || true
+    fi
     ;;
+
   *)
     die "[nvim] Unsupported platform: ${PLATFORM:-unset}"
     ;;
   esac
+
+  log "[nvim] Linking config..."
+  mkdir -p "$HOME/.config"
+  safe_symlink "$root/config/nvim" "$HOME/.config/nvim"
+
+  log "[nvim] Done."
 }
 
 nvim_task "$@"
