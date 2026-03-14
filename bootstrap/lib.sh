@@ -6,8 +6,44 @@ warn() { printf "\n\033[1;33m!!\033[0m %s\n" "$*"; }
 die()  { printf "\n\033[1;31mxx\033[0m %s\n" "$*"; exit 1; }
 
 need_cmd() { command -v "$1" >/dev/null 2>&1 || die "Missing command: $1"; }
+has_cmd() { command -v "$1" >/dev/null 2>&1; }
 
-is_wsl() { grep -qi microsoft /proc/version 2>/dev/null; }
+is_wsl() {
+  grep -qi microsoft /proc/version 2>/dev/null
+}
+
+detect_platform() {
+  case "$(uname -s)" in
+    Darwin)
+      PLATFORM="macos"
+      ;;
+    Linux)
+      if is_wsl; then
+        PLATFORM="wsl"
+      else
+        PLATFORM="linux"
+      fi
+      ;;
+    *)
+      PLATFORM="unknown"
+      ;;
+  esac
+
+  export PLATFORM
+}
+
+ensure_supported_platform() {
+  detect_platform
+
+  case "$PLATFORM" in
+    macos|linux|wsl)
+      log "Detected platform: $PLATFORM"
+      ;;
+    *)
+      die "Unsupported platform: $(uname -s)"
+      ;;
+  esac
+}
 
 ensure_sudo() {
   need_cmd sudo
@@ -15,11 +51,32 @@ ensure_sudo() {
 }
 
 ensure_apt() {
-  command -v apt >/dev/null 2>&1 || die "This installer currently supports Debian/Ubuntu (apt)."
+  has_cmd apt || die "apt not found. This step requires Debian/Ubuntu."
+}
+
+ensure_brew() {
+  if has_cmd brew; then
+    return
+  fi
+
+  log "Homebrew not found. Installing Homebrew..."
+
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+  setup_brew_shellenv
+
+  has_cmd brew || die "Homebrew installation completed, but brew is still not available in PATH."
+}
+
+setup_brew_shellenv() {
+  if [[ -x /opt/homebrew/bin/brew ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [[ -x /usr/local/bin/brew ]]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+  fi
 }
 
 repo_root() {
-  # directory of this script's parent (bootstrap/)
   cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd
 }
 
@@ -31,7 +88,6 @@ safe_symlink() {
   mkdir -p "$(dirname "$dest")"
 
   if [[ -L "$dest" ]]; then
-    # if already correct symlink, do nothing
     if [[ "$(readlink "$dest")" == "$src" ]]; then
       log "Link already OK: $dest -> $src"
       return
@@ -46,4 +102,50 @@ safe_symlink() {
 
   ln -s "$src" "$dest"
   log "Linked: $dest -> $src"
+}
+
+pkg_update() {
+  case "${PLATFORM:-}" in
+    macos)
+      setup_brew_shellenv
+      brew update
+      ;;
+    linux|wsl)
+      ensure_sudo
+      ensure_apt
+      sudo apt-get update -y
+      ;;
+    *)
+      die "pkg_update called before platform was initialized"
+      ;;
+  esac
+}
+
+pkg_install() {
+  case "${PLATFORM:-}" in
+    macos)
+      setup_brew_shellenv
+      brew install "$@"
+      ;;
+    linux|wsl)
+      ensure_sudo
+      ensure_apt
+      sudo apt-get install -y "$@"
+      ;;
+    *)
+      die "pkg_install called before platform was initialized"
+      ;;
+  esac
+}
+
+pkg_install_cask() {
+  case "${PLATFORM:-}" in
+    macos)
+      setup_brew_shellenv
+      brew install --cask "$@"
+      ;;
+    *)
+      die "pkg_install_cask is only supported on macOS"
+      ;;
+  esac
 }
