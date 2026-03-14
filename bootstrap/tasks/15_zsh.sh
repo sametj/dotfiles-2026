@@ -5,10 +5,8 @@ set -euo pipefail
 source "$(dirname "$0")/../lib.sh"
 
 install_oh_my_zsh() {
-  # Install OMZ only if missing
   if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
     log "[zsh] Installing Oh My Zsh..."
-    # official unattended install
     RUNZSH=no CHSH=no KEEP_ZSHRC=yes \
       sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
   else
@@ -27,7 +25,6 @@ install_p10k() {
 }
 
 install_omz_plugin() {
-  # install_omz_plugin <name> <git_url>
   local name="$1"
   local url="$2"
   local dir="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/$name"
@@ -44,7 +41,6 @@ symlink_zshrc() {
   local root
   root="$(repo_root)"
 
-  # repo-managed zshrc path
   local src="$root/config/shell/zsh/zshrc"
   [[ -f "$src" ]] || die "[zsh] Missing repo zshrc at: $src"
 
@@ -53,11 +49,10 @@ symlink_zshrc() {
 }
 
 set_default_shell_zsh() {
-  # Optional: sets login shell to zsh
-  # Comment out if you don't want it.
-  if command -v zsh >/dev/null 2>&1; then
+  if has_cmd zsh; then
     local zsh_path
     zsh_path="$(command -v zsh)"
+
     if [[ "${SHELL:-}" != "$zsh_path" ]]; then
       log "[zsh] Setting default shell to zsh ($zsh_path)..."
       chsh -s "$zsh_path" || warn "[zsh] chsh failed (not fatal)."
@@ -70,11 +65,37 @@ set_default_shell_zsh() {
 main() {
   log "[zsh] Installing zsh + dependencies..."
 
-  ensure_apt
-  ensure_sudo
+  case "${PLATFORM:-}" in
+    macos)
+      ensure_brew
+      setup_brew_shellenv
+      ;;
+    linux|wsl)
+      ensure_apt
+      ensure_sudo
+      ;;
+    *)
+      die "[zsh] Unsupported platform: ${PLATFORM:-unset}"
+      ;;
+  esac
 
-  sudo apt-get update -y
-  sudo apt-get install -y zsh git curl ca-certificates
+  if ! has_cmd zsh; then
+    pkg_install zsh
+  else
+    log "[zsh] zsh already installed: $(command -v zsh)"
+  fi
+
+  if ! has_cmd git; then
+    pkg_install git
+  else
+    log "[zsh] git already installed: $(command -v git)"
+  fi
+
+  if ! has_cmd curl; then
+    pkg_install curl
+  else
+    log "[zsh] curl already installed: $(command -v curl)"
+  fi
 
   install_oh_my_zsh
   install_p10k
