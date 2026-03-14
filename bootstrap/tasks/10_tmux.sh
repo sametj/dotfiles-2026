@@ -7,11 +7,31 @@ source "$(dirname "$0")/../lib.sh"
 tmux_task() {
   log "[tmux] Installing tmux + TPM and linking config..."
 
-  ensure_apt
-  ensure_sudo
+  case "${PLATFORM:-}" in
+    macos)
+      ensure_brew
+      setup_brew_shellenv
+      ;;
+    linux|wsl)
+      ensure_apt
+      ensure_sudo
+      ;;
+    *)
+      die "[tmux] Unsupported platform: ${PLATFORM:-unset}"
+      ;;
+  esac
 
-  sudo apt-get update -y
-  sudo apt-get install -y tmux git
+  if ! has_cmd tmux; then
+    pkg_install tmux
+  else
+    log "[tmux] tmux already installed: $(command -v tmux)"
+  fi
+
+  if ! has_cmd git; then
+    pkg_install git
+  else
+    log "[tmux] git already installed: $(command -v git)"
+  fi
 
   local root
   root="$(repo_root)"
