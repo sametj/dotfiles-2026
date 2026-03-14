@@ -7,11 +7,25 @@ source "$(dirname "$0")/../lib.sh"
 git_task() {
   log "[git] Installing and configuring git..."
 
-  ensure_apt
-  ensure_sudo
+  case "${PLATFORM:-}" in
+    macos)
+      ensure_brew
+      setup_brew_shellenv
+      ;;
+    linux|wsl)
+      ensure_apt
+      ensure_sudo
+      ;;
+    *)
+      die "[git] Unsupported platform: ${PLATFORM:-unset}"
+      ;;
+  esac
 
-  sudo apt-get update -y
-  sudo apt-get install -y git
+  if ! has_cmd git; then
+    pkg_install git
+  else
+    log "[git] git already installed: $(command -v git)"
+  fi
 
   local root
   root="$(repo_root)"
