@@ -5,19 +5,29 @@ set -euo pipefail
 source "$(dirname "$0")/../lib.sh"
 
 locale_task() {
-  log "[locale] Ensuring UTF-8 locale (en_US.UTF-8)..."
+  case "${PLATFORM:-}" in
+    macos)
+      log "[locale] macOS uses UTF-8 by default. Skipping."
+      return
+      ;;
+    linux|wsl)
+      log "[locale] Ensuring UTF-8 locale (en_US.UTF-8)..."
 
-  ensure_apt
-  ensure_sudo
+      ensure_apt
+      ensure_sudo
 
-  sudo apt-get update -y
-  sudo apt-get install -y locales
+      pkg_update
+      pkg_install locales
 
-  # Generate and set locale
-  sudo locale-gen en_US.UTF-8
-  sudo update-locale LANG=en_US.UTF-8
+      sudo locale-gen en_US.UTF-8
+      sudo update-locale LANG=en_US.UTF-8
 
-  log "[locale] Done. You may need to restart the shell (exec zsh) or WSL for all apps to inherit it."
+      log "[locale] Done. You may need to restart the shell (exec zsh) or WSL."
+      ;;
+    *)
+      die "[locale] Unsupported platform: ${PLATFORM:-unset}"
+      ;;
+  esac
 }
 
 locale_task "$@"
