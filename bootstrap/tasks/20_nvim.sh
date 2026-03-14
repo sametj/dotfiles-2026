@@ -7,29 +7,71 @@ source "$(dirname "$0")/../lib.sh"
 NVIM_VERSION="0.11.6"
 
 nvim_task() {
-  log "[nvim] Installing Neovim v${NVIM_VERSION} to /opt..."
+  log "[nvim] Installing Neovim"
 
-  ensure_apt
-  ensure_sudo
+  case "${PLATFORM:-}" in
+    macos)
+      ensure_brew
+      setup_brew_shellenv
 
-  sudo apt-get update -y
-  sudo apt-get install -y curl tar
+      if has_cmd nvim; then
+        log "[nvim] Neovim already installed: $(command -v nvim)"
+        nvim --version | head -n 2 || true
+        return
+      fi
 
-  local url="https://github.com/neovim/neovim/releases/download/v${NVIM_VERSION}/nvim-linux-x86_64.tar.gz"
-  local tmp="/tmp/nvim-linux-x86_64.tar.gz"
+      pkg_install neovim
+      ;;
 
-  curl -fL -o "$tmp" "$url"
+    linux|wsl)
+      ensure_apt
+      ensure_sudo
 
-  sudo rm -rf "/opt/nvim-${NVIM_VERSION}"
-  sudo tar -C /opt -xzf "$tmp"
-  sudo mv /opt/nvim-linux-x86_64 "/opt/nvim-${NVIM_VERSION}"
+      if has_cmd nvim; then
+        log "[nvim] Neovim already installed: $(command -v nvim)"
+        nvim --version | head -n 2 || true
+        return
+      fi
 
-  # Stable symlink
-  sudo ln -sfn "/opt/nvim-${NVIM_VERSION}" /opt/nvim
+      pkg_update
+      pkg_install curl tar
 
-  log "[nvim] Installed to /opt/nvim"
+      local arch url tmp extract_dir install_dir
+      arch="$(uname -m)"
 
-  /opt/nvim/bin/nvim --version | head -n 2 || true
+      case "$arch" in
+        x86_64|amd64)
+          url="https://github.com/neovim/neovim/releases/download/v${NVIM_VERSION}/nvim-linux-x86_64.tar.gz"
+          extract_dir="nvim-linux-x86_64"
+          ;;
+        aarch64|arm64)
+          url="https://github.com/neovim/neovim/releases/download/v${NVIM_VERSION}/nvim-linux-arm64.tar.gz"
+          extract_dir="nvim-linux-arm64"
+          ;;
+        *)
+          die "[nvim] Unsupported Linux architecture: $arch"
+          ;;
+      esac
+
+      tmp="/tmp/${extract_dir}.tar.gz"
+      install_dir="/opt/nvim-${NVIM_VERSION}"
+
+      log "[nvim] Downloading ${url}"
+      curl -fL -o "$tmp" "$url"
+
+      sudo rm -rf "$install_dir"
+      sudo tar -C /opt -xzf "$tmp"
+      sudo mv "/opt/${extract_dir}" "$install_dir"
+      sudo ln -sfn "$install_dir" /opt/nvim
+
+      log "[nvim] Installed to /opt/nvim"
+      /opt/nvim/bin/nvim --version | head -n 2 || true
+      ;;
+
+    *)
+      die "[nvim] Unsupported platform: ${PLATFORM:-unset}"
+      ;;
+  esac
 }
 
 nvim_task "$@"
