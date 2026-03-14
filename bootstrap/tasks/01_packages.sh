@@ -4,6 +4,42 @@ set -euo pipefail
 # shellcheck disable=SC1091
 source "$(dirname "$0")/../lib.sh"
 
+install_lazygit_linux_release() {
+  need_cmd curl
+  need_cmd tar
+  need_cmd install
+
+  local arch version url tmpdir
+
+  arch="$(uname -m)"
+  case "$arch" in
+  x86_64 | amd64) arch="x86_64" ;;
+  aarch64 | arm64) arch="arm64" ;;
+  *) die "[packages] Unsupported arch for lazygit: $arch" ;;
+  esac
+
+  log "[packages] Installing lazygit from GitHub release..."
+
+  version="$(curl -fsSL https://api.github.com/repos/jesseduffield/lazygit/releases/latest |
+    sed -n 's/.*"tag_name":[[:space:]]*"v\([^"]*\)".*/\1/p' |
+    head -n1)"
+
+  [[ -n "$version" ]] || die "[packages] Could not determine lazygit version."
+
+  url="https://github.com/jesseduffield/lazygit/releases/download/v${version}/lazygit_${version}_Linux_${arch}.tar.gz"
+
+  tmpdir="$(mktemp -d)"
+  curl -fsSL "$url" -o "$tmpdir/lazygit.tar.gz"
+  tar -xzf "$tmpdir/lazygit.tar.gz" -C "$tmpdir"
+
+  mkdir -p "$HOME/.local/bin"
+  install -m 0755 "$tmpdir/lazygit" "$HOME/.local/bin/lazygit"
+
+  rm -rf "$tmpdir"
+
+  log "[packages] lazygit installed at $HOME/.local/bin/lazygit"
+}
+
 install_common_packages_macos() {
   log "[packages] Installing common packages on macOS..."
 
@@ -30,9 +66,9 @@ install_common_packages_macos() {
     ffmpegthumbnailer \
     python \
     pipx \
-    yazi
+    yazi \
+    lazygit
 
-  # Optional but useful
   brew install tree-sitter || true
 }
 
@@ -90,6 +126,17 @@ install_common_packages_linux() {
   if command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1; then
     ln -sfn "$(command -v batcat)" "$HOME/.local/bin/bat"
     log "[packages] Linked bat -> batcat"
+  fi
+
+  if command -v lazygit >/dev/null 2>&1; then
+    log "[packages] lazygit already installed: $(command -v lazygit)"
+  else
+    if sudo apt-get install -y lazygit; then
+      log "[packages] lazygit installed via apt"
+    else
+      warn "[packages] lazygit not available via apt; falling back to GitHub release"
+      install_lazygit_linux_release
+    fi
   fi
 }
 
