@@ -6,6 +6,10 @@ source "$(dirname "$0")/lib.sh"
 
 main() {
   local root tasks_dir task
+  local total=0
+  local succeeded=0
+  local failed=0
+  local -a failed_tasks=()
 
   root="$(repo_root)"
   tasks_dir="$root/bootstrap/tasks"
@@ -32,9 +36,24 @@ main() {
 
   for task in "$tasks_dir"/*.sh; do
     [[ -f "$task" ]] || continue
+    total=$((total + 1))
+
     log "Running: $(basename "$task")"
-    bash "$task"
+    if bash "$task"; then
+      succeeded=$((succeeded + 1))
+    else
+      failed=$((failed + 1))
+      failed_tasks+=("$(basename "$task")")
+      warn "Task failed: $(basename "$task")"
+    fi
   done
+
+  echo
+  log "Bootstrap summary: total=${total}, succeeded=${succeeded}, failed=${failed}"
+  if (( failed > 0 )); then
+    warn "Failed tasks: ${failed_tasks[*]}"
+    die "Bootstrap completed with failures."
+  fi
 
   log "Bootstrap complete."
 

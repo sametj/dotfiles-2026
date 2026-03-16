@@ -49,6 +49,8 @@ install_netcoredbg_linux() {
 }
 
 netcoredbg_task() {
+  ensure_supported_platform
+
   case "${PLATFORM:-}" in
   linux | wsl)
     if has_cmd netcoredbg; then

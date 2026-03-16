@@ -27,7 +27,16 @@ install_dotnet_linux() {
   fi
 
   pkg_update
-  sudo apt-get install -y dotnet-sdk-10.0 || true
+
+  if sudo apt-get install -y dotnet-sdk-10.0; then
+    log "[dotnet] Installed dotnet-sdk-10.0"
+  elif sudo apt-get install -y dotnet-sdk-9.0; then
+    warn "[dotnet] dotnet-sdk-10.0 unavailable; installed dotnet-sdk-9.0 instead"
+  elif sudo apt-get install -y dotnet-sdk-8.0; then
+    warn "[dotnet] dotnet-sdk-10.0/9.0 unavailable; installed dotnet-sdk-8.0 instead"
+  else
+    warn "[dotnet] Failed to install .NET SDK via apt. Check Microsoft repo and Ubuntu version compatibility."
+  fi
 }
 
 install_dotnet_macos() {
@@ -44,6 +53,8 @@ install_dotnet_macos() {
 }
 
 dotnet_task() {
+  ensure_supported_platform
+
   case "${PLATFORM:-}" in
   macos)
     install_dotnet_macos
