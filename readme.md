@@ -166,22 +166,22 @@ Located in:
 
 bootstrap/tasks/
 
-Each file is independent and executable:
+Each file is independent and executable. Current tasks include:
 
+- `00_locale.sh`
+- `01_packages.sh`
 - `02_git.sh`
-    
-- `05_tools.sh`
-    
-- `06_yazi.sh`
-    
+- `03_ssh.sh`
+- `05_yazi.sh`
 - `10_tmux.sh`
-    
 - `15_zsh.sh`
-    
 - `20_nvim.sh`
-    
+- `25_nvm.sh`
+- `30_python_cli.sh`
+- `35_dotnet.sh`
+- `40_netcoredbg.sh`
 
-They are executed in order by `install.sh`.
+They are executed in lexical order by `install.sh`.
 
 ---
 
