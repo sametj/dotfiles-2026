@@ -5,6 +5,8 @@ set -euo pipefail
 source "$(dirname "$0")/../lib.sh"
 
 locale_task() {
+  ensure_supported_platform
+
   case "${PLATFORM:-}" in
   macos)
     log "[locale] macOS uses UTF-8 by default. Skipping."

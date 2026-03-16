@@ -7,6 +7,8 @@ source "$(dirname "$0")/../lib.sh"
 NVIM_VERSION="0.11.6"
 
 nvim_task() {
+  ensure_supported_platform
+
   log "[nvim] Installing Neovim"
 
   local root
