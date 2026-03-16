@@ -112,7 +112,7 @@ config/shell/zsh/zshrc
 
 # 🧩 Tmux Setup
 
-Manual Catppuccin install (no TPM).
+Manual Catppuccin install (TPM is also installed for plugin management).
 
 Plugin path:
 
