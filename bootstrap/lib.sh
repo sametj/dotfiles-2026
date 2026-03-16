@@ -8,6 +8,27 @@ die()  { printf "\n\033[1;31mxx\033[0m %s\n" "$*"; exit 1; }
 need_cmd() { command -v "$1" >/dev/null 2>&1 || die "Missing command: $1"; }
 has_cmd() { command -v "$1" >/dev/null 2>&1; }
 
+retry() {
+  # retry <attempts> <delay_seconds> <command...>
+  local attempts="$1"
+  local delay="$2"
+  shift 2
+
+  local i
+  for ((i = 1; i <= attempts; i++)); do
+    if "$@"; then
+      return 0
+    fi
+
+    if (( i < attempts )); then
+      warn "Command failed (attempt ${i}/${attempts}); retrying in ${delay}s: $*"
+      sleep "$delay"
+    fi
+  done
+
+  return 1
+}
+
 is_wsl() {
   grep -qi microsoft /proc/version 2>/dev/null
 }
