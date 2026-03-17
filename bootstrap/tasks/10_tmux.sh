@@ -10,10 +10,7 @@ tmux_task() {
   has_cmd tmux || die "[tmux] tmux is required but not installed."
   has_cmd git || die "[tmux] git is required but not installed."
 
-  local root
-  root="$(repo_root)"
-
-  safe_symlink "$root/config/tmux/tmux.conf" "$HOME/.tmux.conf"
+  stow_package "tmux"
 
   if [[ ! -d "$HOME/.tmux/plugins/tpm" ]]; then
     log "[tmux] Installing TPM..."
@@ -23,10 +20,10 @@ tmux_task() {
     log "[tmux] TPM already installed."
   fi
 
-  local plugin_dir="$HOME/.config/tmux/plugins/catppuccin/tmux"
+  local plugin_dir="$HOME/.local/share/tmux/plugins/catppuccin/tmux"
   if [[ ! -d "$plugin_dir/.git" ]]; then
     log "[tmux] Cloning catppuccin/tmux v2.1.3..."
-    mkdir -p "$HOME/.config/tmux/plugins/catppuccin"
+    mkdir -p "$HOME/.local/share/tmux/plugins/catppuccin"
     git clone -b v2.1.3 https://github.com/catppuccin/tmux.git "$plugin_dir"
   else
     log "[tmux] catppuccin already present."

@@ -8,6 +8,10 @@ die()  { printf "\n\033[1;31mxx\033[0m %s\n" "$*"; exit 1; }
 need_cmd() { command -v "$1" >/dev/null 2>&1 || die "Missing command: $1"; }
 has_cmd() { command -v "$1" >/dev/null 2>&1; }
 
+need_stow() {
+  has_cmd stow || die "Missing command: stow"
+}
+
 retry() {
   # retry <attempts> <delay_seconds> <command...>
   local attempts="$1"
@@ -123,6 +127,34 @@ safe_symlink() {
 
   ln -s "$src" "$dest"
   log "Linked: $dest -> $src"
+}
+
+
+list_stow_packages() {
+  # list_stow_packages [stow_dir]
+  local stow_dir="${1:-$(repo_root)/stow}"
+  local dir
+
+  [[ -d "$stow_dir" ]] || return 0
+
+  for dir in "$stow_dir"/*; do
+    [[ -d "$dir" ]] || continue
+    basename "$dir"
+  done | sort
+}
+
+stow_package() {
+  # stow_package <package>
+  local package="$1"
+  local root stow_dir
+  root="$(repo_root)"
+  stow_dir="$root/stow"
+
+  need_stow
+  [[ -d "$stow_dir/$package" ]] || die "Stow package not found: $stow_dir/$package"
+
+  log "Stowing package: $package"
+  stow --dir "$stow_dir" --target "$HOME" --restow "$package"
 }
 
 pkg_update() {

@@ -67,7 +67,8 @@ install_common_packages_macos() {
     python \
     pipx \
     yazi \
-    lazygit
+    lazygit \
+    stow
 
   if brew install tree-sitter; then
     log "[packages] Optional package install succeeded: tree-sitter"
@@ -118,7 +119,8 @@ install_common_packages_linux() {
     pipx \
     tmux \
     zsh \
-    locales
+    locales \
+    stow
 
   apt_install_optional \
     fzf \

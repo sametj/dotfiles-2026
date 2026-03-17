@@ -32,7 +32,7 @@ This will:
 
 - Install required packages
     
-- Symlink configs
+- Stow-managed dotfile symlinks
     
 - Install tmux + Catppuccin theme
     
@@ -71,12 +71,20 @@ dotfiles/
 │   ├── lib.sh          # Shared helpers  
 │   └── tasks/          # Modular install steps  
 │  
-├── config/  
-│   ├── git/            # Git config  
-│   ├── nvim/           # Neovim config (Lazy.nvim)  
-│   ├── shell/          # Zsh config (modular)  
-│   └── tmux/           # Tmux config (manual Catppuccin)  
-│  
+├── config/             # Source config files
+│   ├── git/            # Git config
+│   ├── nvim/           # Neovim config (Lazy.nvim)
+│   ├── shell/          # Zsh config (modular)
+│   └── tmux/           # Tmux config (manual Catppuccin)
+│
+├── stow/               # GNU Stow packages (targets under $HOME)
+│   ├── git/
+│   ├── nvim/
+│   ├── tmux/
+│   └── zsh/
+│
+├── scripts/            # Helpers (e.g. scaffold new stow packages)
+│
 └── README.md
 
 ---
@@ -116,9 +124,9 @@ Manual Catppuccin install (TPM is also installed for plugin management).
 
 Plugin path:
 
-~/.config/tmux/plugins/catppuccin/tmux
+~/.local/share/tmux/plugins/catppuccin/tmux
 
-Bootstrap ensures it’s cloned and pinned.
+Bootstrap ensures it’s cloned and pinned. `~/.tmux.conf` and `~/.config/tmux` are linked via GNU Stow.
 
 Entry config:
 
@@ -158,6 +166,8 @@ Config path:
 
 config/nvim/
 
+(`~/.config/nvim` is linked via GNU Stow.)
+
 ---
 
 # 🔧 Bootstrap Tasks
@@ -166,7 +176,7 @@ Located in:
 
 bootstrap/tasks/
 
-Each file is independent and executable. Current tasks include:
+Each file is independent and executable. Stow-backed tasks (`git`, `tmux`, `zsh`, `nvim`) restow their package each run. Current tasks include:
 
 - `00_locale.sh`
 - `01_packages.sh`
@@ -182,6 +192,36 @@ Each file is independent and executable. Current tasks include:
 - `40_netcoredbg.sh`
 
 They are executed in lexical order by `install.sh`.
+
+---
+
+
+# ➕ Add a New Stow-Managed App
+
+From repo root:
+
+```bash
+./scripts/new-stow-package.sh ghostty
+```
+
+This scaffolds:
+
+- `config/ghostty/` (source files)
+- `stow/ghostty/.config/ghostty` (stow mapping)
+
+Then apply immediately:
+
+```bash
+stow --dir stow --target "$HOME" --restow ghostty
+```
+
+Validate package health:
+
+```bash
+./bootstrap/doctor.sh
+```
+
+If you want Ghostty included in full bootstrap runs, add a task under `bootstrap/tasks/` that calls `stow_package "ghostty"`.
 
 ---
 
@@ -224,7 +264,7 @@ nvim --version
 - Neovim auto-update task
 - LazyGit bootstrap task
 - Better idempotency checks
-- CI validation script
+- ShellCheck in CI
 
 ---
 
