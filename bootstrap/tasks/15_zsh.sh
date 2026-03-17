@@ -38,14 +38,8 @@ install_omz_plugin() {
 }
 
 symlink_zshrc() {
-  local root
-  root="$(repo_root)"
-
-  local src="$root/config/shell/zsh/zshrc"
-  [[ -f "$src" ]] || die "[zsh] Missing repo zshrc at: $src"
-
-  log "[zsh] Linking ~/.zshrc -> repo zshrc"
-  safe_symlink "$src" "$HOME/.zshrc"
+  log "[zsh] Stowing ~/.zshrc"
+  stow_package "zsh"
 }
 
 set_default_shell_zsh() {

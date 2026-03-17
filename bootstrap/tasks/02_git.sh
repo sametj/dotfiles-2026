@@ -9,13 +9,7 @@ git_task() {
 
   has_cmd git || die "[git] git is required but not installed."
 
-  local root
-  root="$(repo_root)"
-
-  safe_symlink "$root/config/git/gitconfig" "$HOME/.gitconfig"
-
-  mkdir -p "$HOME/.config/git"
-  safe_symlink "$root/config/git/gitignore_global" "$HOME/.config/git/gitignore_global"
+  stow_package "git"
 
   local local_cfg="$HOME/.gitconfig.local"
   if [[ ! -f "$local_cfg" ]]; then
