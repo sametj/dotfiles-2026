@@ -193,6 +193,36 @@ They are executed in lexical order by `install.sh`.
 
 ---
 
+
+# ➕ Add a New Stow-Managed App
+
+From repo root:
+
+```bash
+./scripts/new-stow-package.sh ghostty
+```
+
+This scaffolds:
+
+- `config/ghostty/` (source files)
+- `stow/ghostty/.config/ghostty` (stow mapping)
+
+Then apply immediately:
+
+```bash
+stow --dir stow --target "$HOME" --restow ghostty
+```
+
+Validate package health:
+
+```bash
+./bootstrap/doctor.sh
+```
+
+If you want Ghostty included in full bootstrap runs, add a task under `bootstrap/tasks/` that calls `stow_package "ghostty"`.
+
+---
+
 # 🔄 Updating
 
 To update the environment:
@@ -232,7 +262,7 @@ nvim --version
 - Neovim auto-update task
 - LazyGit bootstrap task
 - Better idempotency checks
-- CI validation script
+- ShellCheck in CI
 
 ---
 
