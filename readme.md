@@ -83,8 +83,6 @@ dotfiles/
 │   ├── tmux/
 │   └── zsh/
 │
-├── scripts/            # Helpers (e.g. scaffold new stow packages)
-│
 └── README.md
 
 ---
@@ -126,7 +124,7 @@ Plugin path:
 
 ~/.local/share/tmux/plugins/catppuccin/tmux
 
-Bootstrap ensures it’s cloned and pinned. `~/.tmux.conf` and `~/.config/tmux` are linked via GNU Stow.
+Bootstrap ensures it’s cloned and pinned. `~/.tmux.conf` is linked via GNU Stow.
 
 Entry config:
 

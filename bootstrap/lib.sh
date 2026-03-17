@@ -129,20 +129,6 @@ safe_symlink() {
   log "Linked: $dest -> $src"
 }
 
-
-list_stow_packages() {
-  # list_stow_packages [stow_dir]
-  local stow_dir="${1:-$(repo_root)/stow}"
-  local dir
-
-  [[ -d "$stow_dir" ]] || return 0
-
-  for dir in "$stow_dir"/*; do
-    [[ -d "$dir" ]] || continue
-    basename "$dir"
-  done | sort
-}
-
 stow_package() {
   # stow_package <package>
   local package="$1"

@@ -5,34 +5,14 @@ log() {
   printf "\n\033[1;33m==>\033[0m %s\n" "$*"
 }
 
-list_stow_packages() {
-  local stow_dir="$1"
-  local dir
-
-  [[ -d "$stow_dir" ]] || return 0
-
-  for dir in "$stow_dir"/*; do
-    [[ -d "$dir" ]] || continue
-    basename "$dir"
-  done | sort
-}
-
 unstow_packages() {
   local root stow_dir
-  local -a packages=()
-
   root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
   stow_dir="$root/stow"
 
   if [[ -d "$stow_dir" ]] && command -v stow >/dev/null 2>&1; then
-    while IFS= read -r pkg; do
-      [[ -n "$pkg" ]] && packages+=("$pkg")
-    done < <(list_stow_packages "$stow_dir")
-
-    if (( ${#packages[@]} > 0 )); then
-      log "Unstowing dotfile packages: ${packages[*]}"
-      stow --dir "$stow_dir" --target "$HOME" --delete "${packages[@]}" || true
-    fi
+    log "Unstowing dotfile packages..."
+    stow --dir "$stow_dir" --target "$HOME" --delete git nvim tmux zsh || true
   fi
 }
 
