@@ -10,10 +10,7 @@ tmux_task() {
   has_cmd tmux || die "[tmux] tmux is required but not installed."
   has_cmd git || die "[tmux] git is required but not installed."
 
-  local root
-  root="$(repo_root)"
-
-  safe_symlink "$root/config/tmux/tmux.conf" "$HOME/.tmux.conf"
+  stow_package "tmux"
 
   if [[ ! -d "$HOME/.tmux/plugins/tpm" ]]; then
     log "[tmux] Installing TPM..."
