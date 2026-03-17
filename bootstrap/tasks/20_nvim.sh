@@ -11,9 +11,6 @@ nvim_task() {
 
   log "[nvim] Installing Neovim"
 
-  local root
-  root="$(repo_root)"
-
   case "${PLATFORM:-}" in
   macos)
     ensure_brew
@@ -74,9 +71,8 @@ nvim_task() {
     ;;
   esac
 
-  log "[nvim] Linking config..."
-  mkdir -p "$HOME/.config"
-  safe_symlink "$root/config/nvim" "$HOME/.config/nvim"
+  log "[nvim] Stowing config..."
+  stow_package "nvim"
 
   log "[nvim] Done."
 }

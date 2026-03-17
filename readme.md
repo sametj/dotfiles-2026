@@ -32,7 +32,7 @@ This will:
 
 - Install required packages
     
-- Symlink configs
+- Stow-managed dotfile symlinks
     
 - Install tmux + Catppuccin theme
     
@@ -71,12 +71,18 @@ dotfiles/
 │   ├── lib.sh          # Shared helpers  
 │   └── tasks/          # Modular install steps  
 │  
-├── config/  
-│   ├── git/            # Git config  
-│   ├── nvim/           # Neovim config (Lazy.nvim)  
-│   ├── shell/          # Zsh config (modular)  
-│   └── tmux/           # Tmux config (manual Catppuccin)  
-│  
+├── config/             # Source config files
+│   ├── git/            # Git config
+│   ├── nvim/           # Neovim config (Lazy.nvim)
+│   ├── shell/          # Zsh config (modular)
+│   └── tmux/           # Tmux config (manual Catppuccin)
+│
+├── stow/               # GNU Stow packages (targets under $HOME)
+│   ├── git/
+│   ├── nvim/
+│   ├── tmux/
+│   └── zsh/
+│
 └── README.md
 
 ---
@@ -118,7 +124,7 @@ Plugin path:
 
 ~/.config/tmux/plugins/catppuccin/tmux
 
-Bootstrap ensures it’s cloned and pinned.
+Bootstrap ensures it’s cloned and pinned. `~/.tmux.conf` is linked via GNU Stow.
 
 Entry config:
 
@@ -158,6 +164,8 @@ Config path:
 
 config/nvim/
 
+(`~/.config/nvim` is linked via GNU Stow.)
+
 ---
 
 # 🔧 Bootstrap Tasks
@@ -166,7 +174,7 @@ Located in:
 
 bootstrap/tasks/
 
-Each file is independent and executable. Current tasks include:
+Each file is independent and executable. Stow-backed tasks (`git`, `tmux`, `zsh`, `nvim`) restow their package each run. Current tasks include:
 
 - `00_locale.sh`
 - `01_packages.sh`
