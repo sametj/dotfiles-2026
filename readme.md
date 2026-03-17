@@ -122,7 +122,7 @@ Manual Catppuccin install (TPM is also installed for plugin management).
 
 Plugin path:
 
-~/.config/tmux/plugins/catppuccin/tmux
+~/.local/share/tmux/plugins/catppuccin/tmux
 
 Bootstrap ensures it’s cloned and pinned. `~/.tmux.conf` is linked via GNU Stow.
 

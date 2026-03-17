@@ -42,6 +42,7 @@ fi
 log "Removing tmux plugins..."
 
 rm -rf "$HOME/.tmux/plugins"
+rm -rf "$HOME/.local/share/tmux/plugins"
 
 log "Removing netcoredbg..."
 
