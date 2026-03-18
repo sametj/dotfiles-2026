@@ -43,7 +43,7 @@ Example:
 apps/git/
 ├── manifest.yaml
 └── files/
-    └── .gitconfig
+    └── .config/git/gitconfig
 ```
 
 ## Manifest Shape
@@ -65,7 +65,7 @@ install:
     brew:
       - git
 link:
-  strategy: symlink-tree
+  strategy: stow
 checks:
   - command: git --version
 notes:
@@ -93,7 +93,7 @@ Optional fields:
 
 Prefer one linking strategy across the repo.
 
-### Recommended default: symlink-tree app folders
+### Recommended default: stow-compatible app folders
 
 Each app's `files/` directory should mirror the target layout under `$HOME`.
 
@@ -101,15 +101,22 @@ Examples:
 
 - `apps/zsh/files/.zshrc`
 - `apps/nvim/files/.config/nvim/init.lua`
-- `apps/git/files/.gitconfig`
+- `apps/git/files/.config/git/gitconfig`
 
-This keeps linking predictable while allowing bootstrap to symlink the tree directly into `$HOME`.
+This keeps the future migration path simple whether the repo uses GNU Stow directly or a custom symlink wrapper.
 
-## Current State
+## What Stays in `config/`
 
-The primary tracked config for git, ghostty, nvim, tmux, and zsh now lives under `apps/<app>/files/`.
+The existing `config/` tree can remain during migration.
 
-Bootstrap tasks still exist, but their responsibility is now focused on package installation and machine-local setup while file linking comes from the app tree.
+Short term:
+- Keep current bootstrap tasks working.
+- Add new apps under `apps/`.
+- Migrate old apps one at a time.
+
+Long term:
+- Move tracked app config from `config/` into `apps/<app>/files/`.
+- Keep `bootstrap/` focused on orchestration only.
 
 ## Machine State vs Tracked Files
 
@@ -150,15 +157,15 @@ Enhance `bootstrap/install.sh` to support:
 - manifest validation
 - generic checks
 
-### Phase 4: Expand app coverage
+### Phase 4: Migrate existing apps
 
-Recommended next migrations:
+Recommended order:
 
-1. yazi
-2. nvm
-3. python CLI tooling
-4. dotnet
-5. netcoredbg
+1. git
+2. zsh
+3. tmux
+4. nvim
+5. optional tooling like yazi, nvm, python, dotnet
 
 ## Design Principles
 

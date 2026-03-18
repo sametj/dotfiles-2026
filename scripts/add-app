@@ -52,7 +52,7 @@ install:
   macos:
     brew: []
 link:
-  strategy: symlink-tree
+  strategy: stow
 checks: []
 notes: []
 EOF_MANIFEST

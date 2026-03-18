@@ -38,7 +38,7 @@ The `files/` directory should reflect where files land under `$HOME`.
 
 Examples:
 
-- `apps/git/files/.gitconfig`
+- `apps/git/files/.config/git/gitconfig`
 - `apps/zsh/files/.zshrc`
 - `apps/nvim/files/.config/nvim/init.lua`
 
@@ -56,7 +56,7 @@ install:
   macos:
     brew: []
 link:
-  strategy: symlink-tree
+  strategy: stow
 checks: []
 notes: []
 ```
