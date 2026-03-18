@@ -4,37 +4,31 @@ set -euo pipefail
 # shellcheck disable=SC1091
 source "$(dirname "$0")/../lib.sh"
 
-install_oh_my_zsh() {
-  if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
-    log "[zsh] Installing Oh My Zsh..."
-    RUNZSH=no CHSH=no KEEP_ZSHRC=yes \
-      sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-  else
-    log "[zsh] Oh My Zsh already installed."
+install_starship() {
+  if has_cmd starship; then
+    log "[zsh] starship already installed: $(command -v starship)"
+    return
   fi
-}
 
-install_p10k() {
-  local p10k_dir="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
-  if [[ ! -d "$p10k_dir" ]]; then
-    log "[zsh] Installing powerlevel10k..."
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$p10k_dir"
-  else
-    log "[zsh] powerlevel10k already installed."
-  fi
-}
-
-install_omz_plugin() {
-  local name="$1"
-  local url="$2"
-  local dir="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/$name"
-
-  if [[ ! -d "$dir" ]]; then
-    log "[zsh] Installing OMZ plugin: $name"
-    git clone --depth=1 "$url" "$dir"
-  else
-    log "[zsh] OMZ plugin already installed: $name"
-  fi
+  case "${PLATFORM:-}" in
+  macos)
+    log "[zsh] Installing starship via Homebrew..."
+    pkg_install starship
+    ;;
+  linux | wsl)
+    log "[zsh] Installing starship..."
+    if sudo apt-get install -y starship; then
+      log "[zsh] starship installed via apt"
+    else
+      warn "[zsh] starship not available via apt; using official install script"
+      need_cmd curl
+      retry 3 2 sh -c "$(curl -fsSL https://starship.rs/install.sh)" -- -y
+    fi
+    ;;
+  *)
+    die "[zsh] Unsupported platform for starship install: ${PLATFORM:-unset}"
+    ;;
+  esac
 }
 
 symlink_zshrc() {
@@ -57,18 +51,15 @@ set_default_shell_zsh() {
 }
 
 main() {
-  log "[zsh] Configuring zsh..."
+  ensure_supported_platform
+
+  log "[zsh] Configuring zsh + starship..."
 
   has_cmd zsh || die "[zsh] zsh is required but not installed."
   has_cmd git || die "[zsh] git is required but not installed."
   has_cmd curl || die "[zsh] curl is required but not installed."
 
-  install_oh_my_zsh
-  install_p10k
-
-  install_omz_plugin "zsh-autosuggestions" "https://github.com/zsh-users/zsh-autosuggestions.git"
-  install_omz_plugin "zsh-syntax-highlighting" "https://github.com/zsh-users/zsh-syntax-highlighting.git"
-
+  install_starship
   symlink_zshrc
   set_default_shell_zsh
 
