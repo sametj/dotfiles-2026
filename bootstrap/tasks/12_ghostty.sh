@@ -2,5 +2,6 @@
 set -euo pipefail
 source "$(dirname "$0")/../lib.sh"
 
-log "[ghostty] Stowing Ghostty config..."
-stow_package "ghostty"
+log "[ghostty] Linking Ghostty config..."
+root="$(repo_root)"
+safe_symlink "$root/config/ghostty" "$HOME/.config/ghostty"
