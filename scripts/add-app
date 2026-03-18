@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  scripts/add-app <app-name>
+
+Creates a new app scaffold under apps/<app-name>/ with:
+  - manifest.yaml
+  - files/
+  - hooks/
+
+The app name must contain only lowercase letters, numbers, and hyphens.
+USAGE
+}
+
+if [[ $# -ne 1 ]]; then
+  usage
+  exit 1
+fi
+
+app_name="$1"
+
+if [[ ! "$app_name" =~ ^[a-z0-9-]+$ ]]; then
+  echo "error: invalid app name '$app_name'" >&2
+  echo "hint: use lowercase letters, numbers, and hyphens only" >&2
+  exit 1
+fi
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+app_dir="$repo_root/apps/$app_name"
+manifest="$app_dir/manifest.yaml"
+
+if [[ -e "$app_dir" ]]; then
+  echo "error: app already exists: $app_dir" >&2
+  exit 1
+fi
+
+mkdir -p "$app_dir/files" "$app_dir/hooks"
+
+cat > "$manifest" <<EOF_MANIFEST
+name: $app_name
+description: TODO
+platforms:
+  - linux
+  - wsl
+  - macos
+install:
+  linux:
+    packages: []
+  macos:
+    brew: []
+link:
+  strategy: stow
+checks: []
+notes: []
+EOF_MANIFEST
+
+cat > "$app_dir/hooks/README.md" <<'EOF_HOOKS'
+# Hooks
+
+Place app-specific helper scripts here only when manifest data is not enough.
+EOF_HOOKS
+
+cat > "$app_dir/files/.gitkeep" <<'EOF_GITKEEP'
+EOF_GITKEEP
+
+echo "Created app scaffold: apps/$app_name"
+echo "Next steps:"
+echo "  1. Edit apps/$app_name/manifest.yaml"
+echo "  2. Add tracked files under apps/$app_name/files/"
+echo "  3. Add optional hooks under apps/$app_name/hooks/"
