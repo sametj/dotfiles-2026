@@ -52,6 +52,23 @@ nvm_task() {
     npm install -g pnpm
   fi
 
+  local root confdir nvm_conf
+  root="$(repo_root)"
+  confdir="$root/config/shell/zsh/conf.d"
+  nvm_conf="$confdir/45-nvm.zsh"
+
+  mkdir -p "$confdir"
+
+  cat >"$nvm_conf" <<'ZSH'
+# NVM (Node Version Manager)
+export NVM_DIR="$HOME/.nvm"
+[[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
+
+if command -v nvm >/dev/null 2>&1; then
+  nvm use --silent default >/dev/null 2>&1 || true
+fi
+ZSH
+
   log "[nvm] node: $(node -v)"
   log "[nvm] npm:  $(npm -v)"
   log "[nvm] pnpm: $(pnpm -v)"
