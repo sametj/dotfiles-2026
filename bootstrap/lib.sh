@@ -188,3 +188,11 @@ pkg_install_cask() {
       ;;
   esac
 }
+
+manifest_field() {
+  # manifest_field <manifest_path> <field_name>
+  local manifest_path="$1"
+  local field_name="$2"
+
+  awk -F': ' -v key="$field_name" '$1 == key { print substr($0, index($0, $2)); exit }' "$manifest_path"
+}
