@@ -68,7 +68,7 @@ install_common_packages_macos() {
     pipx \
     yazi \
     lazygit \
-    starship
+    stow
 
   if brew install tree-sitter; then
     log "[packages] Optional package install succeeded: tree-sitter"
@@ -119,7 +119,8 @@ install_common_packages_linux() {
     pipx \
     tmux \
     zsh \
-    locales
+    locales \
+    stow
 
   apt_install_optional \
     fzf \
@@ -129,7 +130,7 @@ install_common_packages_linux() {
     zoxide \
     git-delta
 
-  apt_install_optional tree-sitter-cli starship
+  apt_install_optional tree-sitter-cli
 
   mkdir -p "$HOME/.local/bin"
 

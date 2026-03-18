@@ -32,18 +32,8 @@ install_starship() {
 }
 
 symlink_zshrc() {
-  local root
-  root="$(repo_root)"
-
-  local src="$root/config/shell/zsh/zshrc"
-  [[ -f "$src" ]] || die "[zsh] Missing repo zshrc at: $src"
-
-  if [[ -e "$HOME/.zshrc" && ! -L "$HOME/.zshrc" ]]; then
-    warn "[zsh] Existing ~/.zshrc detected (regular file). It will be backed up before linking."
-  fi
-
-  log "[zsh] Linking ~/.zshrc -> repo zshrc"
-  safe_symlink "$src" "$HOME/.zshrc"
+  log "[zsh] Stowing ~/.zshrc"
+  stow_package "zsh"
 }
 
 set_default_shell_zsh() {
