@@ -32,8 +32,8 @@ install_starship() {
 }
 
 symlink_zshrc() {
-  log "[zsh] Stowing ~/.zshrc"
-  stow_package "zsh"
+  log "[zsh] Linking zsh app files"
+  link_app_files "zsh"
 }
 
 set_default_shell_zsh() {

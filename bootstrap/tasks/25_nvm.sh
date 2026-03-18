@@ -54,8 +54,8 @@ nvm_task() {
 
   local root confdir nvm_conf
   root="$(repo_root)"
-  confdir="$root/config/shell/zsh/conf.d"
-  nvm_conf="$confdir/45-nvm.zsh"
+  confdir="$root/apps/zsh/files/.config/zsh/conf.d"
+  nvm_conf="$confdir/45-node.zsh"
 
   mkdir -p "$confdir"
 

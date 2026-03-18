@@ -44,7 +44,7 @@ return {
 					end
 					return util.find_git_ancestor(fname)
 						or util.root_pattern(".luarc.json", ".luarc.jsonc", ".git")(fname)
-						or vim.fn.expand("~/.config/nvim") -- fallback for config files
+						or vim.fn.expand("~/.config/nvim") -- fallback for local config files
 				end,
 				settings = {
 					Lua = {

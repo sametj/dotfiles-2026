@@ -1,20 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-log() {
-  printf "\n\033[1;33m==>\033[0m %s\n" "$*"
-}
-
-unstow_packages() {
-  local root stow_dir
-  root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-  stow_dir="$root/stow"
-
-  if [[ -d "$stow_dir" ]] && command -v stow >/dev/null 2>&1; then
-    log "Unstowing dotfile packages..."
-    stow --dir "$stow_dir" --target "$HOME" --delete git nvim tmux zsh || true
-  fi
-}
+# shellcheck disable=SC1091
+source "$(dirname "$0")/lib.sh"
 
 remove_if_symlink() {
   local target="$1"
@@ -25,19 +13,30 @@ remove_if_symlink() {
   fi
 }
 
+unlink_app_files() {
+  local app="$1"
+  local files_dir src rel dest
+
+  files_dir="$(app_files_dir "$app")"
+  [[ -d "$files_dir" ]] || return 0
+
+  while IFS= read -r -d '' src; do
+    rel="${src#"$files_dir"/}"
+    [[ "$rel" == ".gitkeep" ]] && continue
+    [[ -d "$src" ]] && continue
+
+    dest="$HOME/$rel"
+    remove_if_symlink "$dest"
+  done < <(find "$files_dir" -mindepth 1 -print0)
+}
+
 log "Removing dotfiles symlinks..."
 
-unstow_packages
-
-# Fallback cleanup for non-stow-managed installs.
-remove_if_symlink "$HOME/.zshrc"
-remove_if_symlink "$HOME/.tmux.conf"
-remove_if_symlink "$HOME/.gitconfig"
-remove_if_symlink "$HOME/.config/nvim"
-
-if [[ -L "$HOME/.config/git/gitignore_global" ]]; then
-  rm "$HOME/.config/git/gitignore_global"
-fi
+unlink_app_files git
+unlink_app_files zsh
+unlink_app_files tmux
+unlink_app_files nvim
+unlink_app_files ghostty
 
 log "Removing tmux plugins..."
 
@@ -54,15 +53,6 @@ log "Removing optional tools..."
 rm -f "$HOME/.local/bin/lazygit"
 rm -f "$HOME/.local/bin/yazi"
 rm -f "$HOME/.local/bin/ya"
-
-log "Removing Oh My Zsh (optional)..."
-
-if [[ -d "$HOME/.oh-my-zsh" ]]; then
-  read -rp "Remove Oh My Zsh? [y/N] " ans
-  if [[ "$ans" =~ ^[Yy]$ ]]; then
-    rm -rf "$HOME/.oh-my-zsh"
-  fi
-fi
 
 log "Removing nvm (optional)..."
 

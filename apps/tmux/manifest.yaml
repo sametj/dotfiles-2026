@@ -1,0 +1,19 @@
+name: tmux
+description: Tmux configuration and plugin bootstrap
+platforms:
+  - linux
+  - wsl
+  - macos
+install:
+  linux:
+    packages:
+      - tmux
+  macos:
+    brew:
+      - tmux
+link:
+  strategy: symlink-tree
+checks:
+  - command: tmux -V
+notes:
+  - Bootstrap also installs TPM and the pinned Catppuccin theme

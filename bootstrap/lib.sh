@@ -8,9 +8,6 @@ die()  { printf "\n\033[1;31mxx\033[0m %s\n" "$*"; exit 1; }
 need_cmd() { command -v "$1" >/dev/null 2>&1 || die "Missing command: $1"; }
 has_cmd() { command -v "$1" >/dev/null 2>&1; }
 
-need_stow() {
-  has_cmd stow || die "Missing command: stow"
-}
 
 retry() {
   # retry <attempts> <delay_seconds> <command...>
@@ -105,6 +102,18 @@ repo_root() {
   cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd
 }
 
+app_dir() {
+  # app_dir <app>
+  local app="$1"
+  printf '%s/apps/%s\n' "$(repo_root)" "$app"
+}
+
+app_files_dir() {
+  # app_files_dir <app>
+  local app="$1"
+  printf '%s/files\n' "$(app_dir "$app")"
+}
+
 safe_symlink() {
   # safe_symlink <source> <dest>
   local src="$1"
@@ -129,18 +138,33 @@ safe_symlink() {
   log "Linked: $dest -> $src"
 }
 
+link_app_files() {
+  # link_app_files <app>
+  local app="$1"
+  local files_dir src rel dest
+
+  files_dir="$(app_files_dir "$app")"
+  [[ -d "$files_dir" ]] || die "App files directory not found: $files_dir"
+
+  log "Linking app files: $app"
+
+  while IFS= read -r -d '' src; do
+    rel="${src#"$files_dir"/}"
+    [[ "$rel" == ".gitkeep" ]] && continue
+
+    if [[ -d "$src" ]]; then
+      mkdir -p "$HOME/$rel"
+      continue
+    fi
+
+    dest="$HOME/$rel"
+    safe_symlink "$src" "$dest"
+  done < <(find "$files_dir" -mindepth 1 -print0)
+}
+
 stow_package() {
-  # stow_package <package>
-  local package="$1"
-  local root stow_dir
-  root="$(repo_root)"
-  stow_dir="$root/stow"
-
-  need_stow
-  [[ -d "$stow_dir/$package" ]] || die "Stow package not found: $stow_dir/$package"
-
-  log "Stowing package: $package"
-  stow --dir "$stow_dir" --target "$HOME" --restow "$package"
+  # Backward-compatible wrapper for tasks that still use the old name.
+  link_app_files "$1"
 }
 
 pkg_update() {
@@ -187,4 +211,12 @@ pkg_install_cask() {
       die "pkg_install_cask is only supported on macOS"
       ;;
   esac
+}
+
+manifest_field() {
+  # manifest_field <manifest_path> <field_name>
+  local manifest_path="$1"
+  local field_name="$2"
+
+  awk -F': ' -v key="$field_name" '$1 == key { print substr($0, index($0, $2)); exit }' "$manifest_path"
 }
