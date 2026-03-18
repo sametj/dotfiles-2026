@@ -32,8 +32,10 @@ install_starship() {
 }
 
 symlink_zshrc() {
-  log "[zsh] Stowing ~/.zshrc"
-  stow_package "zsh"
+  log "[zsh] Linking ~/.zshrc"
+  local root
+  root="$(repo_root)"
+  safe_symlink "$root/config/shell/zsh/zshrc" "$HOME/.zshrc"
 }
 
 set_default_shell_zsh() {

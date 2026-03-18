@@ -71,8 +71,10 @@ nvim_task() {
     ;;
   esac
 
-  log "[nvim] Stowing config..."
-  stow_package "nvim"
+  log "[nvim] Linking config..."
+  local root
+  root="$(repo_root)"
+  safe_symlink "$root/config/nvim" "$HOME/.config/nvim"
 
   log "[nvim] Done."
 }
