@@ -10,7 +10,7 @@ tmux_task() {
   has_cmd tmux || die "[tmux] tmux is required but not installed."
   has_cmd git || die "[tmux] git is required but not installed."
 
-  stow_package "tmux"
+  link_app_files "tmux"
 
   if [[ ! -d "$HOME/.tmux/plugins/tpm" ]]; then
     log "[tmux] Installing TPM..."

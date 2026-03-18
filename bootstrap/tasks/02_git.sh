@@ -9,12 +9,12 @@ git_task() {
 
   has_cmd git || die "[git] git is required but not installed."
 
-  stow_package "git"
+  link_app_files "git"
 
   local local_cfg="$HOME/.gitconfig.local"
   if [[ ! -f "$local_cfg" ]]; then
     warn "[git] Creating $local_cfg (private settings go here)"
-    cat >"$local_cfg" <<'EOF'
+    cat >"$local_cfg" <<'CFG'
 # ~/.gitconfig.local (NOT in dotfiles repo)
 # Put machine-specific or private settings here.
 
@@ -24,7 +24,7 @@ git_task() {
 # Example:
 # [includeIf "gitdir:~/work/"]
 #     path = ~/.gitconfig.work
-EOF
+CFG
   else
     log "[git] $local_cfg already exists; leaving it untouched."
   fi

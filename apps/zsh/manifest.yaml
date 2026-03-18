@@ -1,0 +1,21 @@
+name: zsh
+description: Zsh shell configuration and prompt bootstrap
+platforms:
+  - linux
+  - wsl
+  - macos
+install:
+  linux:
+    packages:
+      - zsh
+      - curl
+  macos:
+    brew:
+      - zsh
+      - starship
+link:
+  strategy: symlink-tree
+checks:
+  - command: zsh --version
+notes:
+  - Bootstrap installs starship and links ~/.zshrc plus ~/.config/zsh

@@ -1,0 +1,19 @@
+name: git
+description: Git configuration and aliases
+platforms:
+  - linux
+  - wsl
+  - macos
+install:
+  linux:
+    packages:
+      - git
+  macos:
+    brew:
+      - git
+link:
+  strategy: symlink-tree
+checks:
+  - command: git --version
+notes:
+  - Creates ~/.gitconfig.local if missing

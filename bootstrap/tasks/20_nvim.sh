@@ -71,8 +71,8 @@ nvim_task() {
     ;;
   esac
 
-  log "[nvim] Stowing config..."
-  stow_package "nvim"
+  log "[nvim] Linking config..."
+  link_app_files "nvim"
 
   log "[nvim] Done."
 }

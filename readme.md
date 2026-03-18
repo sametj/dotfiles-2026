@@ -1,302 +1,95 @@
 # 📦 TJ Dotfiles
 
-Personal development environment setup for Linux (Ubuntu / WSL).
+Personal development environment setup for Linux, WSL, and macOS.
 
-This repository manages:
+This repo is now organized around **apps**. Each app owns:
 
-- Zsh + Starship (modular config)
-- Tmux (manual Catppuccin theme)
-- Neovim (Lazy.nvim-based setup)
-- Modern CLI tools (ripgrep, fd, fzf, eza, etc.)
-- Git configuration
-- Bootstrap installer for full system setup
+- a `manifest.yaml`
+- tracked files under `files/`
+- optional app-specific helper scripts under `hooks/`
 
----
+The bootstrap layer installs packages and links app files into `$HOME`.
 
-## 🚀 Quick Start
+## Repo Layout
 
-Clone the repo:
+```text
+.
+├── apps/               # App-oriented source of truth
+│   ├── git/
+│   ├── ghostty/
+│   ├── nvim/
+│   ├── tmux/
+│   └── zsh/
+├── bootstrap/          # Installer logic and tasks
+├── docs/               # Architecture and contributor docs
+└── scripts/            # Small helper scripts
+```
+
+## Quick Start
 
 ```bash
 git clone https://github.com/<your-username>/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-```
-
-Run bootstrap:
-
-```shell
 ./bootstrap/install.sh
 ```
 
-This will:
+## Current Migrated Apps
 
-- Install required packages
-    
-- Stow-managed dotfile symlinks
-    
-- Install tmux + Catppuccin theme
-    
-- Install Zsh + Starship prompt
-    
-- Install Neovim
-    
-- Install modern CLI tools
-    
+- `git`
+- `ghostty`
+- `nvim`
+- `tmux`
+- `zsh`
 
----
-
-# 🧠 Philosophy
-
-- Repo contains **your configuration only**
-    
-- Third-party plugins are installed via bootstrap
-    
-- No system pollution
-    
-- Everything reproducible
-    
-- Safe to re-run (idempotent design)
-    
-
----
-
-# 📁 Structure
-
-dotfiles/  
-│  
-├── bin/                # Custom CLI tools (added to PATH)  
-│  
-├── bootstrap/          # Installer logic  
-│   ├── install.sh      # Entry point  
-│   ├── lib.sh          # Shared helpers  
-│   └── tasks/          # Modular install steps  
-│  
-├── config/             # Source config files
-│   ├── git/            # Git config
-│   ├── nvim/           # Neovim config (Lazy.nvim)
-│   ├── shell/          # Zsh config (modular)
-│   └── tmux/           # Tmux config (manual Catppuccin)
-│
-├── stow/               # GNU Stow packages (targets under $HOME)
-│   ├── git/
-│   ├── nvim/
-│   ├── tmux/
-│   └── zsh/
-│
-└── README.md
-
----
-
-# 🖥 Zsh Setup
-
-- Zsh shell
-    
-- Starship prompt
-    
-- Modular config via `conf.d/`
-    
-- Tools:
-    
-    - zoxide
-        
-    - fzf
-        
-    - bat
-        
-    - eza
-        
-    - ripgrep
-        
-    - fd
-        
-
-Zsh entry file:
-
-config/shell/zsh/zshrc
-
-Prompt is initialized from `config/shell/zsh/conf.d/20-shell-core.zsh` (Starship).
-
----
-
-# 🧩 Tmux Setup
-
-Manual Catppuccin install (TPM is also installed for plugin management).
-
-Plugin path:
-
-~/.local/share/tmux/plugins/catppuccin/tmux
-
-Bootstrap ensures it’s cloned and pinned. `~/.tmux.conf` is linked via GNU Stow.
-
-Entry config:
-
-config/tmux/tmux.conf
-
-Modular files:
-
-- core.conf
-    
-- keybinds.tmux
-    
-- theme.conf
-    
-- status.conf
-    
-- plugins.conf
-    
-
----
-
-# 🧠 Neovim Setup
-
-- Lazy.nvim
-    
-- LSP
-    
-- Treesitter
-    
-- Modular plugin structure
-    
-- Yazi integration
-    
-- Theming support (Catppuccin, Kanagawa, Github)
-    
-
-Config path:
-
-config/nvim/
-
-(`~/.config/nvim` is linked via GNU Stow.)
-
----
-
-# 🔧 Bootstrap Tasks
-
-Located in:
-
-bootstrap/tasks/
-
-Each file is independent and executable:
-
-- `02_git.sh`
-    
-- `05_tools.sh`
-    
-- `06_yazi.sh`
-    
-- `10_tmux.sh`
-    
-- `15_zsh.sh`
-    
-- `20_nvim.sh`
-    
-
-They are executed in order by `install.sh`.
-
----
-
-
-# ➕ Add a New Stow-Managed App
-
-From repo root:
+List app manifests:
 
 ```bash
-./scripts/new-stow-package.sh ghostty
+./bootstrap/install.sh --list-apps
 ```
 
-This scaffolds:
-
-- `config/ghostty/` (source files)
-- `stow/ghostty/.config/ghostty` (stow mapping)
-
-Then apply immediately:
+Scaffold a new app:
 
 ```bash
-stow --dir stow --target "$HOME" --restow ghostty
+scripts/add-app wezterm
 ```
 
-Validate package health:
+## How Linking Works
 
-```bash
-./bootstrap/doctor.sh
-```
+Each app's `files/` directory mirrors the final layout under `$HOME`.
 
-If you want Ghostty included in full bootstrap runs, add a task under `bootstrap/tasks/` that calls `stow_package "ghostty"`.
+Examples:
 
----
+- `apps/git/files/.gitconfig` → `~/.gitconfig`
+- `apps/git/files/.config/git/gitignore_global` → `~/.config/git/gitignore_global`
+- `apps/nvim/files/.config/nvim/init.lua` → `~/.config/nvim/init.lua`
+- `apps/tmux/files/.tmux.conf` → `~/.tmux.conf`
+- `apps/zsh/files/.config/zsh/conf.d/20-shell-core.zsh` → `~/.config/zsh/conf.d/20-shell-core.zsh`
 
-# 🔄 Updating
+Bootstrap links these files using the shared helper in `bootstrap/lib.sh`.
 
-To update the environment:
+## Bootstrap Tasks
 
-cd ~/dotfiles  
-git pull  
-./bootstrap/install.sh
+The existing task runner is still the execution path when you run `./bootstrap/install.sh` with no flags.
+It currently handles package installation plus machine-local setup such as:
 
----
+- Git local config bootstrap
+- Tmux plugin installation
+- Zsh + starship setup
+- Neovim installation
+- NVM / Python / .NET tooling
 
-# 📌 Requirements
+## Important Paths
 
-- Ubuntu 22.04+ or WSL
-    
-- sudo access
-    
-- Git
-    
+- Git config: `apps/git/files/.gitconfig`
+- Zsh entry point: `apps/zsh/files/.zshrc`
+- Zsh modules: `apps/zsh/files/.config/zsh/conf.d/`
+- Tmux entry point: `apps/tmux/files/.tmux.conf`
+- Tmux modules: `apps/tmux/files/.config/tmux/`
+- Neovim config: `apps/nvim/files/.config/nvim/`
+- Ghostty config: `apps/ghostty/files/.config/ghostty/config`
 
----
+## Docs
 
-## ⚠️ Troubleshooting (Stow conflict with `.zshrc`)
-
-If you see an error like:
-
-`cannot stow .../.zshrc over existing target .zshrc since neither a link nor a directory`
-
-it means `~/.zshrc` is currently a regular file. This repo's bootstrap handles that automatically by backing up the file and creating a symlink.
-
-Recommended fix:
-
-```bash
-./bootstrap/install.sh
-```
-
-If you still want to use GNU Stow directly, move the existing file first, then stow:
-
-```bash
-mv ~/.zshrc ~/.zshrc.pre-dotfiles
-# then run your stow command
-```
-
----
-
-# 🛠 Useful Commands
-
-Restart tmux cleanly:
-
-tmux kill-server  
-tmux
-
-Check Neovim version:
-
-nvim --version
-
----
-
-# 🎯 Future Improvements
-- Headless tmux plugin sync
-- Neovim auto-update task
-- LazyGit bootstrap task
-- Better idempotency checks
-- ShellCheck in CI
-
----
-
-## ⚙️ Notes
-
-This setup is designed to be:
-- Portable
-- Minimal
-- Deterministic
-- Fast
-    
-Re-run bootstrap anytime to reapply configuration.
+- Architecture draft: `docs/ARCHITECTURE.md`
+- Adding apps: `docs/ADDING_APPS.md`
+- Apps overview: `apps/README.md`

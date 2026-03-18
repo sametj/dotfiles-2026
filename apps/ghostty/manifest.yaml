@@ -1,0 +1,10 @@
+name: ghostty
+description: Ghostty terminal configuration
+platforms:
+  - linux
+  - macos
+link:
+  strategy: symlink-tree
+checks: []
+notes:
+  - Config only for now; no bootstrap task is wired yet

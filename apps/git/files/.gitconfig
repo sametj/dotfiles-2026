@@ -1,4 +1,4 @@
-# ~/.gitconfig (symlinked from ~/dotfiles/config/git/gitconfig)
+# ~/.gitconfig (symlinked from apps/git/files/.gitconfig)
 
 [user]
     name = TJ
