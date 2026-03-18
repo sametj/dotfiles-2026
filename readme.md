@@ -4,7 +4,7 @@ Personal development environment setup for Linux (Ubuntu / WSL).
 
 This repository manages:
 
-- Zsh (Oh My Zsh + modular config)
+- Zsh + Starship (modular config)
 - Tmux (manual Catppuccin theme)
 - Neovim (Lazy.nvim-based setup)
 - Modern CLI tools (ripgrep, fd, fzf, eza, etc.)
@@ -36,7 +36,7 @@ This will:
     
 - Install tmux + Catppuccin theme
     
-- Install Zsh + plugins
+- Install Zsh + Starship prompt
     
 - Install Neovim
     
@@ -83,9 +83,9 @@ dotfiles/
 
 # 🖥 Zsh Setup
 
-- Oh My Zsh
+- Zsh shell
     
-- Powerlevel10k
+- Starship prompt
     
 - Modular config via `conf.d/`
     
@@ -108,11 +108,13 @@ Zsh entry file:
 
 config/shell/zsh/zshrc
 
+Prompt is initialized from `config/shell/zsh/conf.d/20-shell-core.zsh` (Starship).
+
 ---
 
 # 🧩 Tmux Setup
 
-Manual Catppuccin install (no TPM).
+Manual Catppuccin install (TPM is also installed for plugin management).
 
 Plugin path:
 
@@ -203,6 +205,29 @@ git pull
     
 - Git
     
+
+---
+
+## ⚠️ Troubleshooting (Stow conflict with `.zshrc`)
+
+If you see an error like:
+
+`cannot stow .../.zshrc over existing target .zshrc since neither a link nor a directory`
+
+it means `~/.zshrc` is currently a regular file. This repo's bootstrap handles that automatically by backing up the file and creating a symlink.
+
+Recommended fix:
+
+```bash
+./bootstrap/install.sh
+```
+
+If you still want to use GNU Stow directly, move the existing file first, then stow:
+
+```bash
+mv ~/.zshrc ~/.zshrc.pre-dotfiles
+# then run your stow command
+```
 
 ---
 

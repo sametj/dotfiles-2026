@@ -67,9 +67,24 @@ install_common_packages_macos() {
     python \
     pipx \
     yazi \
-    lazygit
+    lazygit \
+    starship
 
-  brew install tree-sitter || true
+  if brew install tree-sitter; then
+    log "[packages] Optional package install succeeded: tree-sitter"
+  else
+    warn "[packages] Optional package install failed: tree-sitter"
+  fi
+}
+
+
+apt_install_optional() {
+  # apt_install_optional <package> [package ...]
+  if sudo apt-get install -y "$@"; then
+    log "[packages] Optional package install succeeded: $*"
+  else
+    warn "[packages] Optional package install failed: $*"
+  fi
 }
 
 install_common_packages_linux() {
@@ -106,15 +121,15 @@ install_common_packages_linux() {
     zsh \
     locales
 
-  sudo apt-get install -y \
+  apt_install_optional \
     fzf \
     ripgrep \
     fd-find \
     bat \
     zoxide \
-    git-delta || true
+    git-delta
 
-  sudo apt-get install -y tree-sitter-cli || true
+  apt_install_optional tree-sitter-cli starship
 
   mkdir -p "$HOME/.local/bin"
 
@@ -141,6 +156,8 @@ install_common_packages_linux() {
 }
 
 packages_task() {
+  ensure_supported_platform
+
   case "${PLATFORM:-}" in
   macos)
     install_common_packages_macos

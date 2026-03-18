@@ -8,7 +8,7 @@ export LANG="en_US.UTF-8"
 # Terminal colors
 export COLORTERM=truecolor
 
-# Prevent Oh My Zsh title override
+# Keep terminal title behavior stable
 export DISABLE_AUTO_TITLE="true"
 
 

@@ -37,6 +37,7 @@ ssh_task() {
   if ! grep -q "github.com" "$known_hosts" 2>/dev/null; then
     log "[ssh] Adding github.com to known_hosts..."
     ssh-keyscan github.com >>"$known_hosts" 2>/dev/null
+    warn "[ssh] Verify GitHub host fingerprints: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints"
   fi
 
   chmod 644 "$known_hosts"
