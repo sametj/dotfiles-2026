@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Show the contents of every file tracked under apps/.
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+apps_dir="$repo_root/apps"
+
+if [[ ! -d "$apps_dir" ]]; then
+  echo "error: apps directory not found: $apps_dir" >&2
+  exit 1
+fi
+
+find "$apps_dir" -type f | sort | while IFS= read -r f; do
+  echo ""
+  echo "=== ${f#"$repo_root"/} ==="
+  cat "$f"
+done
